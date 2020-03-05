@@ -20,6 +20,7 @@ else
                 <th>Temp. (F)</th>
                 <th>Summary</th>
                 <th>User</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>
@@ -31,6 +32,7 @@ else
                     <td>@forecast.TemperatureF</td>
                     <td>@forecast.Summary</td>
                     <td>@forecast.UserName</td>
+                    <td><button class="btn btn-success" title="Delete" @onclick="@(() => EditForecast(forecast))"><i class="oi oi-pencil"></i></button></td>
                 </tr>
             }
         </tbody>
@@ -110,13 +112,13 @@ else
     void AddNewForecast()
     {
         //make new foreast:
-        var weatherForecastDTO = new WeatherForecastDTO()
-        {
-            Id = 0,
-        };
+        weatherForecastDTO = new WeatherForecastDTO();
+        weatherForecastDTO.Id = 0;
+
 
         //Open the Popup:
         showPopup = true;
+
         title = "New Forecast.";
 
     }
@@ -146,9 +148,20 @@ else
         else
         {
             //This is an update:
+            await Http.PutJsonAsync("api/WatherForecast/Put", weatherForecastDTO);
+
         }
 
         forecasts = await Http.GetJsonAsync<List<WeatherForecastDTO>>(urlApiGet);
     }
+
+    void EditForecast(WeatherForecastDTO model)
+    {
+        //Set the selected forecast as the current forecast:
+        weatherForecastDTO = model;
+        showPopup = true;
+        title = "Edit Forecast.";
+    }
+
 
 }
