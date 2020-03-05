@@ -3,6 +3,9 @@
 
 <h1>Weather forecast</h1>
 
+<button class="btn btn-primary" @onclick="AddNewForecast"><i class="oi oi-plus"></i> Add new Forecast</button>
+<br />
+<br />
 @if (forecasts == null)
 {
     <p><em>Loading...</em></p>
@@ -34,23 +37,118 @@ else
     </table>
 }
 
+<!-- Add a new forecast -->
+
+
+@if (showPopup)
+{
+    <!-- This is the popup to create or edit a forecast -->
+    <div class="modal" tabindex="-1" style="display:block"
+         role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">@title</h3>
+                    <!-- Button to close the popup -->
+                    <button type="button" class="close"
+                            @onclick="ClosePopup">
+                        <span aria-hidden="true">X</span>
+                    </button>
+                </div>
+                <!-- Edit form for the current forecast -->
+                <div class="modal-body">
+                    <label>Celsius forecast</label>
+                    <input class="form-control" type="text" placeholder="Celsius forecast" @bind="weatherForecastDTO.TemperatureC" />
+                    <br />
+                    <label>Fahrenheit forecast</label>
+                    <input class="form-control" type="text" placeholder="Fahrenheit forecast" @bind="weatherForecastDTO.TemperatureF" />
+                    <br />
+                    <label>Summary</label>
+                    <input class="form-control" type="text" placeholder="Summary" @bind="weatherForecastDTO.Summary" />
+                    <br />
+                    <label>User Name</label>
+                    <input class="form-control" type="text" placeholder="User Name" @bind="weatherForecastDTO.UserName" />
+                    <br />
+                    <!-- Button to save the forecast -->
+                    <button class="btn btn-success" @onclick="SaveForecast">Save</button>
+                    <!-- Only show button if not a new record -->
+
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
 @code {
 
     //Stores the forecasts displayed in a list
     private List<WeatherForecastDTO> forecasts;
 
     //store a sin gle forecast:
-     WeatherForecastDTO weatherForecastDTO = new WeatherForecastDTO();
+    WeatherForecastDTO weatherForecastDTO = new WeatherForecastDTO();
 
     //Control if the popup is displayed:
     bool showPopup = false;
+    string title = string.Empty;
+    string urlApiGet = "api/WeatherForecast/GetAsync";
 
     //First methos to run when user vnavictaes to thi control
     protected override async Task OnInitializedAsync()
     {
         //forecasts = await Http.GetJsonAsync<WeatherForecast[]>("WeatherForecast");
 
-        forecasts = await Http.GetJsonAsync<List<WeatherForecastDTO>>("api/WeatherForecast/GetAsync");
+        forecasts = await Http.GetJsonAsync<List<WeatherForecastDTO>>(urlApiGet);
+    }
+
+    void ClosePopup()
+    {
+        //close poppup
+        showPopup = false;
+    }
+
+    void AddNewForecast()
+    {
+        //make new foreast:
+        var weatherForecastDTO = new WeatherForecastDTO()
+        {
+            Id = 0,
+        };
+
+        //Open the Popup:
+        showPopup = true;
+        title = "New Forecast.";
+
+    }
+
+    async Task SaveForecast()
+    {
+        //close the Poput:
+        showPopup = false;
+        if (weatherForecastDTO.Id == 0)
+        {
+            //Create new forecast:
+
+            var newForecast = new WeatherForecastDTO
+            {
+                Date = DateTime.Now,
+                Summary = weatherForecastDTO.Summary,
+                TemperatureC = weatherForecastDTO.TemperatureC,
+                TemperatureF = weatherForecastDTO.TemperatureF,
+                UserName =weatherForecastDTO.UserName,
+
+
+            };
+
+            //Save the Result
+            await Http.PostJsonAsync("/api/WatherForecast/Post", newForecast);
+        }
+        else
+        {
+            //This is an update:
+        }
+
+        forecasts = await Http.GetJsonAsync<List<WeatherForecastDTO>>(urlApiGet);
     }
 
 }

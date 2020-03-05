@@ -62,6 +62,22 @@ namespace BlazorEndToEndClientSide.Server.Controllers
 
         }
 
+        [HttpPost]
+        [Route("/api/WatherForecast/Post")]
+        public void Post([FromBody] WeatherForecastDTO  model)
+        {
+            var weatheForecast = new WeatherForecast 
+            {
+                Id = model.Id,
+                UserName = model.UserName,
+                Date = model.Date,
+                Summary = model.Summary,
+                TemperatureC =model.TemperatureC,
+                TemperatureF = model.TemperatureF,
+            };
 
+            _context.Add(weatheForecast);
+            _context.SaveChanges();
+        }
     }
 }
