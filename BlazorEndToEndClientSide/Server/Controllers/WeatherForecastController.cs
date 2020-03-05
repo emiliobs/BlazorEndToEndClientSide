@@ -94,5 +94,18 @@ namespace BlazorEndToEndClientSide.Server.Controllers
                 _context.SaveChanges();
             }
         }
+
+        [HttpDelete]
+        [Route("api/WatherForecast/Delete/{id}")]
+        public void Delete(int id)
+        {
+            var result = _context.WeatherForecast.FirstOrDefault(w => w.Id == id);
+            if (result != null)
+            {
+                //Remove from the database
+                _context.WeatherForecast.Remove(result);
+                _context.SaveChanges();
+            }
+        }
     }
 }
