@@ -5,36 +5,63 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using BlazorEndToEndClientSide.EndToEnd.Data.EndTEnd;
+using Microsoft.EntityFrameworkCore;
 
 namespace BlazorEndToEndClientSide.Server.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    //[Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
-        private static readonly string[] Summaries = new[]
-        {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
+        //THis holds data context object to comunicate with the database:
+        private readonly EndToEndContext _context;
 
-        private readonly ILogger<WeatherForecastController> logger;
-
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        //Inject the EndToEndContext using dependency injection
+        public WeatherForecastController(EndToEndContext context)
         {
-            this.logger = logger;
+            this._context = context;
         }
 
         [HttpGet]
-        public IEnumerable<WeatherForecast> Get()
+        [Route("api/WeatherForecast/GetAsync")]
+        public async Task<List<WeatherForecastDTO>> GetAsync()
         {
-            var rng = new Random();
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            var result = await _context.WeatherForecast.ToListAsync();
+
+            return result.Select(x => new WeatherForecastDTO
             {
-                Date = DateTime.Now.AddDays(index),
-                TemperatureC = rng.Next(-20, 55),
-                Summary = Summaries[rng.Next(Summaries.Length)]
-            })
-            .ToArray();
+                Id = x.Id,
+                Date = x.Date,
+                Summary = x.Summary,
+                TemperatureC = x.TemperatureC,
+                TemperatureF = x.TemperatureF,
+                UserName = x.UserName,
+            }).ToList();
+
+            //var colWeatherForecast = new List<WeatherForecastDTO>();
+            //foreach (var forecast in result)
+            //{
+            //    var weatherForecastDTO = new WeatherForecastDTO
+            //    {
+            //        Id = forecast.Id,
+            //        Date = forecast.Date,
+            //        Summary = forecast.Summary,
+            //        TemperatureC = forecast.TemperatureC,
+            //        TemperatureF = forecast.TemperatureF,
+            //        UserName = forecast.UserName,
+            //    };
+
+
+
+            //    colWeatherForecast.Add(weatherForecastDTO);
+
+            //}
+
+            //return colWeatherForecast;
+
         }
+
+
     }
 }
